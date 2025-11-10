@@ -1,68 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./index.css";
 import { mockEmails } from "./data/emails";
-import { Email } from "./types";
+import type { Email } from "./types";
 import { PartnerProvider, usePartner } from "./context/PartnerConfigContext";
-import { Inbox } from "./components/Inbox";
+import Inbox from "./components/Inbox";
 import { EmailDetail } from "./components/EmailDetail";
 
 const MainApp: React.FC = () => {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
-  const [openedId, setOpenedId] = useState<string | null>(
-    emails[0]?.id ?? null
+  const [activeId, setActiveId] = useState<string | null>(
+    emails[0]?.id || null
   );
+
   const { config, available, setPartner } = usePartner();
 
-  // Open email
-  const openEmail = (id: string) => {
-    setOpenedId(id);
+  const openMail = (id: string) => {
+    setActiveId(id);
     setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, read: true } : e))
+      prev.map((mail) => (mail.id === id ? { ...mail, read: true } : mail))
     );
   };
 
-  // Mark as Spam
-  const markAsSpam = () => {
+  const updateSelected = (callback: (mail: Email) => Email) => {
     setEmails((prev) =>
-      prev.map((email) =>
-        email.selected ? { ...email, isSpam: true, selected: false } : email
-      )
+      prev.map((mail) => (mail.selected ? callback(mail) : mail))
     );
   };
 
-  // Mark as Read
-  const markAsRead = () => {
-    setEmails((prev) =>
-      prev.map((email) =>
-        email.selected ? { ...email, read: true, selected: false } : email
-      )
-    );
-  };
+  const markAsSpam = () =>
+    updateSelected((mail) => ({ ...mail, isSpam: true, selected: false }));
 
-  // Mark as Unread
-  const markAsUnread = () => {
-    setEmails((prev) =>
-      prev.map((email) =>
-        email.selected ? { ...email, read: false, selected: false } : email
-      )
-    );
-  };
+  const markAsRead = () =>
+    updateSelected((mail) => ({ ...mail, read: true, selected: false }));
 
-  // Delete selected emails
+  const markAsUnread = () =>
+    updateSelected((mail) => ({ ...mail, read: false, selected: false }));
+
   const deleteSelected = () => {
-    setEmails((prev) => prev.filter((email) => !email.selected));
-    setOpenedId(null);
+    setEmails((prev) => prev.filter((mail) => !mail.selected));
+    setActiveId(null);
   };
 
-  // Are any emails selected?
-  const anySelected = emails.some((email) => email.selected);
+  const hasSelection = emails.some((mail) => mail.selected);
+  const openedMail = emails.find((mail) => mail.id === activeId) || null;
 
-  // Currently opened email
-  const currentEmail = emails.find((e) => e.id === openedId) ?? null;
-
-  // Reset openedId when partner changes
-  React.useEffect(() => {
-    setOpenedId(null);
+  // Reset open mail when partner changes
+  useEffect(() => {
+    setActiveId(null);
   }, [config.id]);
 
   return (
@@ -73,9 +57,9 @@ const MainApp: React.FC = () => {
           <h1 className="app-title">Mail Client</h1>
           <div className="label">Partner</div>
           <select
+            className="partner-select"
             value={config.id}
             onChange={(e) => setPartner(e.target.value)}
-            className="partner-select"
           >
             {available.map((p) => (
               <option key={p.id} value={p.id}>
@@ -84,6 +68,7 @@ const MainApp: React.FC = () => {
             ))}
           </select>
         </div>
+
         <div className="config-text">
           Config: {config.allowMarkSpam ? "Spam Enabled" : "No Spam"} |{" "}
           {config.emailSnippet ? "Snippet On" : "Snippet Off"}
@@ -93,7 +78,6 @@ const MainApp: React.FC = () => {
       {/* Main Content */}
       <main className="main-content">
         {/* Toolbar */}
-
         <div className="toolbar">
           <button onClick={markAsRead}>Mark as Read</button>
           <button onClick={markAsUnread}>Mark as Unread</button>
@@ -103,39 +87,43 @@ const MainApp: React.FC = () => {
           <button onClick={deleteSelected}>Delete</button>
         </div>
 
-        {/* Inbox and Detail */}
+        {/* Inbox & Detail */}
         <div className="content-split">
           <section className="inbox-section">
             <Inbox
               emails={emails}
               setEmails={setEmails}
-              onOpen={openEmail}
-              openedId={openedId}
+              onOpen={openMail}
+              openedId={activeId}
               showSnippet={config.emailSnippet}
             />
           </section>
 
           <section className="detail-section">
             <EmailDetail
-              email={currentEmail}
+              email={openedMail}
               onMarkUnread={(id) =>
                 setEmails((prev) =>
-                  prev.map((e) => (e.id === id ? { ...e, read: false } : e))
+                  prev.map((mail) =>
+                    mail.id === id ? { ...mail, read: false } : mail
+                  )
                 )
               }
               onMarkSpam={
                 config.allowMarkSpam
                   ? (id) =>
                       setEmails((prev) =>
-                        prev.map((e) =>
-                          e.id === id ? { ...e, isSpam: true } : e
+                        prev.map((mail) =>
+                          mail.id === id ? { ...mail, isSpam: true } : mail
                         )
                       )
                   : undefined
               }
               onToggleRead={(id, value) =>
                 setEmails((prev) =>
-                  prev.map((e) => (e.id === id ? { ...e, read: value } : e))
+                  prev.map((mail) =>
+                    mail.id === id ? { ...mail, read: value } : mail
+                  )
                 )
               }
             />
@@ -146,12 +134,10 @@ const MainApp: React.FC = () => {
   );
 };
 
-function App() {
-  return (
-    <PartnerProvider>
-      <MainApp />
-    </PartnerProvider>
-  );
-}
+const App: React.FC = () => (
+  <PartnerProvider>
+    <MainApp />
+  </PartnerProvider>
+);
 
 export default App;
