@@ -17,4 +17,5 @@ export type Email = {
   isSpam?: boolean;
   read: boolean;
   spam: boolean;
+  selected?: boolean;
 };
