@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Email } from "../types";
+import "./EmailDetail.css";
 
 interface EmailDetailProps {
   email: Email | null;
   onMarkUnread: (id: string) => void;
-  onMarkSpam?: (id: string) => void; // optional
+  onMarkSpam?: (id: string) => void;
   onToggleRead: (id: string, value: boolean) => void;
+  showSnippet?: boolean; // optional flag
 }
 
 export const EmailDetail: React.FC<EmailDetailProps> = ({
@@ -16,13 +18,8 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
 }) => {
   const [replyOpen, setReplyOpen] = useState(false);
 
-  // Handle the null case safely
   if (!email) {
-    return (
-      <div className="text-gray-400 text-center mt-20">
-        Select an email to view details
-      </div>
-    );
+    return <div className="no-email">Select an email to view details</div>;
   }
 
   const handleMarkUnread = () => {
@@ -34,62 +31,41 @@ export const EmailDetail: React.FC<EmailDetailProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="border-b pb-2 mb-4">
-        <h2 className="text-2xl font-semibold text-gray-800">
-          {email.subject}
-        </h2>
-        <div className="text-sm text-gray-500">
+    <div className="email-detail-container">
+      <div className="email-header">
+        <h2 className="email-subject">{email.subject}</h2>
+        <div className="email-sender-date">
           From: {email.sender} | {new Date(email.date).toLocaleString()}
         </div>
       </div>
 
-      <div className="flex-1 text-gray-700 mb-6 whitespace-pre-line">
-        {email.body}
-      </div>
+      <div className="email-body">{email.body}</div>
 
-      <div className="flex gap-3">
-        <button
-          onClick={handleMarkUnread}
-          className="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-1 rounded"
-        >
+      <div className="email-actions">
+        <button className="btn unread" onClick={handleMarkUnread}>
           Mark Unread
         </button>
-
         {onMarkSpam && (
-          <button
-            onClick={handleMarkSpam}
-            className="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-1 rounded"
-          >
+          <button className="btn spam" onClick={handleMarkSpam}>
             Mark Spam
           </button>
         )}
-
-        <button
-          onClick={() => setReplyOpen(!replyOpen)}
-          className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-3 py-1 rounded"
-        >
+        <button className="btn reply" onClick={() => setReplyOpen(!replyOpen)}>
           {replyOpen ? "Cancel" : "Reply"}
         </button>
       </div>
 
       {replyOpen && (
-        <div className="mt-4">
+        <div className="reply-section">
           <textarea
-            className="w-full h-24 border rounded p-2 focus:ring focus:ring-blue-200"
+            className="reply-textarea"
             placeholder="Type your reply..."
           />
-          <div className="flex justify-end mt-2 gap-2">
-            <button
-              className="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300"
-              onClick={() => setReplyOpen(false)}
-            >
+          <div className="reply-actions">
+            <button className="btn cancel" onClick={() => setReplyOpen(false)}>
               Cancel
             </button>
-            <button
-              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-              onClick={() => setReplyOpen(false)}
-            >
+            <button className="btn send" onClick={() => setReplyOpen(false)}>
               Send
             </button>
           </div>

@@ -1,0 +1,131 @@
+/* When no email is selected */
+.no-email {
+  color: #9ca3af; /* gray */
+  text-align: center;
+  margin-top: 80px;
+  font-size: 16px;
+}
+
+/* Container */
+.email-detail-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Header */
+.email-header {
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+}
+
+.email-subject {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937; /* gray-800 */
+  margin: 0;
+}
+
+.email-sender-date {
+  font-size: 14px;
+  color: #6b7280; /* gray-500 */
+}
+
+/* Body */
+.email-body {
+  flex: 1;
+  color: #374151; /* gray-700 */
+  margin-bottom: 24px;
+  white-space: pre-line;
+}
+
+/* Action buttons */
+.email-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* Specific button styles */
+.btn.unread {
+  background-color: #fef3c7; /* yellow-100 */
+  color: #b45309; /* yellow-800 */
+}
+
+.btn.unread:hover {
+  background-color: #fde68a; /* yellow-200 */
+}
+
+.btn.spam {
+  background-color: #fee2e2; /* red-100 */
+  color: #991b1b; /* red-800 */
+}
+
+.btn.spam:hover {
+  background-color: #fecaca; /* red-200 */
+}
+
+.btn.reply {
+  background-color: #dbeafe; /* blue-100 */
+  color: #1d4ed8; /* blue-800 */
+}
+
+.btn.reply:hover {
+  background-color: #bfdbfe; /* blue-200 */
+}
+
+/* Reply section */
+.reply-section {
+  margin-top: 16px;
+}
+
+.reply-textarea {
+  width: 100%;
+  height: 96px;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+}
+
+.reply-textarea:focus {
+  border-color: #60a5fa; /* blue-400 */
+  box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.3);
+}
+
+/* Reply buttons */
+.reply-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn.cancel {
+  background-color: #e5e7eb; /* gray-200 */
+  color: #111827; /* gray-900 */
+}
+
+.btn.cancel:hover {
+  background-color: #d1d5db; /* gray-300 */
+}
+
+.btn.send {
+  background-color: #2563eb; /* blue-600 */
+  color: #ffffff;
+}
+
+.btn.send:hover {
+  background-color: #1d4ed8; /* blue-700 */
+}

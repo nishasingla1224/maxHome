@@ -1,35 +1,58 @@
 import React from "react";
 import { Email } from "../types";
+import "./Inbox.css";
 
 interface InboxProps {
   emails: Email[];
   onOpen: (id: string) => void;
-  openedId: string | null;
   setEmails: React.Dispatch<React.SetStateAction<Email[]>>;
+  openedId: string | null;
+  showSnippet: boolean;
 }
 
-export const Inbox: React.FC<InboxProps> = ({ emails, onOpen, openedId }) => {
+export const Inbox: React.FC<InboxProps> = ({
+  emails,
+  onOpen,
+  setEmails,
+  openedId,
+  showSnippet,
+}) => {
+  const toggleSelect = (id: string, checked: boolean) => {
+    setEmails((prev) =>
+      prev.map((email) =>
+        email.id === id ? { ...email, selected: checked } : email
+      )
+    );
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="inbox-container">
       {emails.map((email) => (
         <div
           key={email.id}
-          className={`p-3 rounded-lg cursor-pointer border hover:bg-blue-50 transition ${
-            openedId === email?.id
-              ? "border-blue-400 bg-blue-50"
-              : "border-gray-200"
-          }`}
+          className={`email-item ${openedId === email?.id ? "opened" : ""}`}
           onClick={() => onOpen(email.id)}
         >
-          <div className="flex justify-between">
-            <span className="font-medium text-gray-800">{email.sender}</span>
-            <span className="text-xs text-gray-400">
-              {new Date(email.date).toLocaleDateString()}
-            </span>
-          </div>
-          <div className="text-sm text-gray-700 truncate">{email.subject}</div>
-          <div className="text-xs text-gray-500 truncate">
-            {email.body.slice(0, 50)}...
+          <input
+            type="checkbox"
+            checked={email.selected || false}
+            onChange={(e) => {
+              e.stopPropagation();
+              toggleSelect(email.id, e.target.checked);
+            }}
+          />
+          <div className="email-content">
+            <div className="email-header">
+              <span className="email-sender">{email.sender}</span>
+              <span className="email-date">
+                {new Date(email.date).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="email-subject">{email.subject}</div>
+            {showSnippet && (
+              <div className="email-body">{email.body.slice(0, 50)}...</div>
+            )}
+            {email.isSpam && <div className="spam-tag">SPAM</div>}
           </div>
         </div>
       ))}
