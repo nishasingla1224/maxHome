@@ -1,0 +1,8 @@
+{
+  "id": "partnerB",
+  "name": "Partner B",
+  "showSnippet": false,
+  "allowMarkSpam": true,
+  "bulkActionsEnabled": true,
+  "theme": { "accentColor": "#10b981", "logoText": "GreenMail" }
+}
