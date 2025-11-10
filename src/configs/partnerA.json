@@ -1,0 +1,9 @@
+{
+  "id": "partnerA",
+  "name": "Partner A",
+  "showSnippet": true,
+  "allowMarkSpam": false,
+  "bulkActionsEnabled": true,
+  "theme": { "accentColor": "#2563eb", "logoText": "BlueMail" }
+}
+
