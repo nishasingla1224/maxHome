@@ -39,7 +39,6 @@ Changing the dropdown triggers a context update that re-renders components:
 
 - **Inbox** shows/hides the email snippet (`config.emailSnippet`)
 - **Mark as Spam** button is visible only if `config.allowMarkSpam` is true
-- **Theme color** dynamically changes based on `config.themeColor`
 
 ---
 
