@@ -1,61 +1,81 @@
 import React from "react";
-import { Email } from "../types";
+import type { Email } from "../types";
 import "./Inbox.css";
 
-interface InboxProps {
+type Props = {
   emails: Email[];
-  onOpen: (id: string) => void;
-  setEmails: React.Dispatch<React.SetStateAction<Email[]>>;
   openedId: string | null;
   showSnippet: boolean;
-}
+  onOpen: (id: string) => void;
+  setEmails: React.Dispatch<React.SetStateAction<Email[]>>;
+};
 
-export const Inbox: React.FC<InboxProps> = ({
+const Inbox: React.FC<Props> = ({
   emails,
-  onOpen,
-  setEmails,
   openedId,
   showSnippet,
+  onOpen,
+  setEmails,
 }) => {
-  const toggleSelect = (id: string, checked: boolean) => {
+  const handleSelect = (id: string, isChecked: boolean) => {
     setEmails((prev) =>
-      prev.map((email) =>
-        email.id === id ? { ...email, selected: checked } : email
+      prev.map((mail) =>
+        mail.id === id ? { ...mail, selected: isChecked } : mail
       )
     );
   };
 
+  const openMail = (id: string) => {
+    setEmails((prev) =>
+      prev.map((mail) => (mail.id === id ? { ...mail, isRead: true } : mail))
+    );
+    onOpen(id);
+  };
+
   return (
     <div className="inbox-container">
-      {emails.map((email) => (
-        <div
-          key={email.id}
-          className={`email-item ${openedId === email?.id ? "opened" : ""}`}
-          onClick={() => onOpen(email.id)}
-        >
-          <input
-            type="checkbox"
-            checked={email.selected || false}
-            onChange={(e) => {
-              e.stopPropagation();
-              toggleSelect(email.id, e.target.checked);
-            }}
-          />
-          <div className="email-content">
-            <div className="email-header">
-              <span className="email-sender">{email.sender}</span>
-              <span className="email-date">
-                {new Date(email.date).toLocaleDateString()}
-              </span>
+      {emails.map((mail) => {
+        const { id, sender, date, subject, body, selected, isRead, isSpam } =
+          mail;
+
+        const classNames = [
+          "email-item",
+          openedId === id ? "opened" : "",
+          isRead ? "read" : "unread",
+          isSpam ? "spam" : "",
+        ]
+          .filter(Boolean)
+          .join(" ");
+
+        return (
+          <div key={id} className={classNames} onClick={() => openMail(id)}>
+            <input
+              type="checkbox"
+              checked={!!selected}
+              onChange={(e) => handleSelect(id, e.target.checked)}
+              onClick={(e) => e.stopPropagation()}
+            />
+            <div className="email-content">
+              <div className="email-header">
+                <span className="email-sender">{sender}</span>
+                <span className="email-date">
+                  {new Date(date).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div className="email-subject">{subject}</div>
+
+              {showSnippet && (
+                <div className="email-body">{body.slice(0, 50)}...</div>
+              )}
+
+              {isSpam && <div className="spam-tag">SPAM</div>}
             </div>
-            <div className="email-subject">{email.subject}</div>
-            {showSnippet && (
-              <div className="email-body">{email.body.slice(0, 50)}...</div>
-            )}
-            {email.isSpam && <div className="spam-tag">SPAM</div>}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
+
+export default Inbox;
