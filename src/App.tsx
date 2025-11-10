@@ -13,6 +13,7 @@ const MainApp: React.FC = () => {
   );
   const { config, available, setPartner } = usePartner();
 
+  // Open email
   const openEmail = (id: string) => {
     setOpenedId(id);
     setEmails((prev) =>
@@ -20,31 +21,61 @@ const MainApp: React.FC = () => {
     );
   };
 
-  const markSpamFromDetail = (id: string) => {
+  // Mark as Spam
+  const markAsSpam = () => {
     setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, isSpam: true } : e))
+      prev.map((email) =>
+        email.selected ? { ...email, isSpam: true, selected: false } : email
+      )
     );
   };
 
-  const toggleRead = (id: string, value: boolean) => {
+  // Mark as Read
+  const markAsRead = () => {
     setEmails((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, read: value } : e))
+      prev.map((email) =>
+        email.selected ? { ...email, read: true, selected: false } : email
+      )
     );
   };
 
+  // Mark as Unread
+  const markAsUnread = () => {
+    setEmails((prev) =>
+      prev.map((email) =>
+        email.selected ? { ...email, read: false, selected: false } : email
+      )
+    );
+  };
+
+  // Delete selected emails
+  const deleteSelected = () => {
+    setEmails((prev) => prev.filter((email) => !email.selected));
+    setOpenedId(null);
+  };
+
+  // Are any emails selected?
+  const anySelected = emails.some((email) => email.selected);
+
+  // Currently opened email
   const currentEmail = emails.find((e) => e.id === openedId) ?? null;
 
+  // Reset openedId when partner changes
+  React.useEffect(() => {
+    setOpenedId(null);
+  }, [config.id]);
+
   return (
-    <div className="flex h-screen bg-gray-100 font-sans">
+    <div className="app-container">
       {/* Sidebar */}
-      <aside className="w-64 bg-white border-r p-4 flex flex-col justify-between">
+      <aside className="sidebar">
         <div>
-          <h1 className="text-2xl font-bold mb-6 text-blue-600">Mail Client</h1>
-          <div className="mb-3 text-gray-600 font-medium">Partner</div>
+          <h1 className="app-title">Mail Client</h1>
+          <div className="label">Partner</div>
           <select
             value={config.id}
             onChange={(e) => setPartner(e.target.value)}
-            className="w-full border rounded p-2 text-gray-700 focus:outline-none focus:ring focus:ring-blue-200"
+            className="partner-select"
           >
             {available.map((p) => (
               <option key={p.id} value={p.id}>
@@ -53,32 +84,63 @@ const MainApp: React.FC = () => {
             ))}
           </select>
         </div>
-        <div className="text-sm text-gray-400 text-center mt-6">
-          Config: {config.allowMarkSpam ? "Spam Enabled" : "No Spam"}
+        <div className="config-text">
+          Config: {config.allowMarkSpam ? "Spam Enabled" : "No Spam"} |{" "}
+          {config.emailSnippet ? "Snippet On" : "Snippet Off"}
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex flex-1 overflow-hidden">
-        {/* Inbox */}
-        <section className="w-1/3 border-r overflow-y-auto p-4 bg-white">
-          <Inbox
-            emails={emails}
-            setEmails={setEmails}
-            onOpen={openEmail}
-            openedId={openedId}
-          />
-        </section>
+      <main className="main-content">
+        {/* Toolbar */}
 
-        {/* Email Detail */}
-        <section className="flex-1 p-6 overflow-y-auto">
-          <EmailDetail
-            email={currentEmail}
-            onMarkUnread={(id) => toggleRead(id, false)}
-            onMarkSpam={config.allowMarkSpam ? markSpamFromDetail : undefined}
-            onToggleRead={toggleRead}
-          />
-        </section>
+        <div className="toolbar">
+          <button onClick={markAsRead}>Mark as Read</button>
+          <button onClick={markAsUnread}>Mark as Unread</button>
+          {config.allowMarkSpam && (
+            <button onClick={markAsSpam}>Mark as Spam</button>
+          )}
+          <button onClick={deleteSelected}>Delete</button>
+        </div>
+
+        {/* Inbox and Detail */}
+        <div className="content-split">
+          <section className="inbox-section">
+            <Inbox
+              emails={emails}
+              setEmails={setEmails}
+              onOpen={openEmail}
+              openedId={openedId}
+              showSnippet={config.emailSnippet}
+            />
+          </section>
+
+          <section className="detail-section">
+            <EmailDetail
+              email={currentEmail}
+              onMarkUnread={(id) =>
+                setEmails((prev) =>
+                  prev.map((e) => (e.id === id ? { ...e, read: false } : e))
+                )
+              }
+              onMarkSpam={
+                config.allowMarkSpam
+                  ? (id) =>
+                      setEmails((prev) =>
+                        prev.map((e) =>
+                          e.id === id ? { ...e, isSpam: true } : e
+                        )
+                      )
+                  : undefined
+              }
+              onToggleRead={(id, value) =>
+                setEmails((prev) =>
+                  prev.map((e) => (e.id === id ? { ...e, read: value } : e))
+                )
+              }
+            />
+          </section>
+        </div>
       </main>
     </div>
   );
